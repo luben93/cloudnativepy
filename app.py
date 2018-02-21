@@ -46,7 +46,63 @@ def create_user():
             }
     return jsonify({'status':add_user(user)}), 201
 
+@app.route("/api/v1/users",methods=['DELETE'])
+def delete_user():
+    if not request.json or 'username' not in request.json:
+        abort(400)
+    user = request.json['username']
+    return jsonify({'status': del_user(user)}) ,200
 
+
+@app.route("/api/v1/users/<int:user_id>",methods=['PUT'])
+def update_user(user_id):
+    user = {}
+    if not request.json:
+        abort(400)
+    user['id'] = user_id
+    key_list = request.json.keys()
+    for i in key_list:
+        user[i] = request.json[i]
+    print(user)
+    return jsonify({'status': upd_user(user)}),200
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+def del_user(del_user):
+    conn = sqlite3.connect('mydb.db')
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM users where username=?',(del_user,))
+    data = cursor.fetchall()
+    if len(data) != 1:
+        abort(404)
+    else:
+        cursor.execute('delete from users where username==?',(del_user,))
+        conn.commit()
+    return 'success'
 
 
 def list_user(user_id):
