@@ -88,9 +88,19 @@ def update_user(user_id):
 
 
 
-
-
-
+def upd_user(user):
+    conn = sqlite3.connect('mydb.db')
+    cursor = conn.cursor()
+    cursor.execute('SELECT * from users where id=?',(user['id'],))
+    data = cursor.fetchall()
+    if len(data) == 0:
+        abort(404)
+    else:
+        key_list = user.keys
+        for i in key_list:
+            if i != 'id':
+                cursor.execute(""" UPDATE users set {0}=? where id=?""".format(i),(user[i],user['id']))
+        return "success"
 
 def del_user(del_user):
     conn = sqlite3.connect('mydb.db')
