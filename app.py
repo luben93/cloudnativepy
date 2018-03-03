@@ -149,7 +149,7 @@ def upd_user(user):
     if len(data) == 0:
         abort(404)
     else:
-        key_list = user.keys
+        key_list = user.keys()
         for i in key_list:
             if i != 'id':
                 cursor.execute(""" UPDATE users set {0}=? where id=?""".format(i),(user[i],user['id']))
