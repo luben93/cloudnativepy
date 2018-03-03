@@ -4,9 +4,10 @@ from flask import make_response
 from flask import request
 from flask import abort
 
+from datetime import datetime
+
 import json
 import sqlite3
-import strftime
 
 app = Flask(__name__)
 
@@ -66,10 +67,6 @@ def update_user(user_id):
     print(user)
     return jsonify({'status': upd_user(user)}),200
 
-
-
-
-
 @app.route('/api/v2/tweets', methods=['GET'])
 def get_tweets():
     return list_tweets()
@@ -81,9 +78,12 @@ def add_tweets():
         abort(400)
     user_tweet['username'] = request.json['username']
     user_tweet['body'] = request.json['body']
-    user_tweet['created_at'] = strftime("%Y-%m-%dT%H:%M:%SZ", gmtime())
+    user_tweet['created_at'] = datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
     return jsonify({'status':add_tweet(user_tweet)}), 200
 
+@app.route('/api/v2/tweets/<int:id>',methods=['GET'])
+def get_tweet(id):
+    return list_tweet(id)
 
 
 
@@ -92,13 +92,29 @@ def add_tweets():
 
 
 
+
+def list_tweet(id):
+    conn = sqlite3.connect('mydb.db')
+    api_list = []
+    cursor = conn.execute("SELECT * from tweets where id=?",(id,))
+    data = cursor.fetchall()
+    if(len(data)==0):
+        abort(404)
+    else:
+        user = {}
+        user['id'] = data[0][0]
+        user['username'] = data[0][1]
+        user['body'] = data[0][2]
+        user['tweet_time'] = data[0][3]
+    conn.close()
+    return jsonify(user)
 
 
 def add_tweet(new_tweet):
     conn = sqlite3.connect("mydb.db")
     cursor = conn.cursor()
     cursor.execute("SELECT * from users where username=? ", (new_tweet['username'],))
-    data.fetchall()
+    data = cursor.fetchall()
     if len(data) == 0:
         abort(404)
     else:
@@ -112,7 +128,7 @@ def list_tweets():
     cursor = conn.execute("SELECT username, body, tweet_time, id from tweets")
     data = cursor.fetchall()
     if len(data) != 0:
-        for row in cursor:
+        for row in data:
             tweets = {}
             tweets['Tweet by'] = row[0]
             tweets['Body'] = row[1]
