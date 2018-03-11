@@ -3,6 +3,7 @@ from flask import jsonify
 from flask import make_response
 from flask import request
 from flask import abort
+from flask import render_template
 
 from datetime import datetime
 
@@ -39,6 +40,7 @@ def get_user(user_id):
 @app.route('/api/v1/users',methods = ['POST'])
 def create_user():
     if not request.json or not 'username' in request.json or not 'email' in request.json or not 'password' in request.json:
+        print("400 error in route")
         abort(400)
     user = {'username':request.json['username'],
             'email':request.json['email'],
@@ -85,8 +87,9 @@ def add_tweets():
 def get_tweet(id):
     return list_tweet(id)
 
-
-
+@app.route('/adduser')
+def add_user():
+    return render_template('adduser.html')
 
 
 
@@ -209,6 +212,7 @@ def add_user(new_user):
     cursor = conn.cursor()
     cursor.execute("SELECT * from users where username=? or emailid=?",(new_user['username'],new_user['email']))
     if len(cursor.fetchall()) != 0:
+        print("409 already exists")
         abort(409)
     else:
         cursor.execute("insert into users (username,emailid,password,full_name) values (?,?,?,?)",(new_user['username'],new_user['email'],new_user['password'],new_user['name']))
