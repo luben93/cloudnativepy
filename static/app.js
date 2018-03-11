@@ -22,7 +22,6 @@ function UserListViewModel() {
 		self.password("");
 	};
 	self.save = function (){
-		console.log("gonna ajax it away"+self.name())
 		return $.ajax({
 			url: '/api/v1/users',
 			contentType: 'application/json',
@@ -44,6 +43,14 @@ function UserListViewModel() {
 			}
 		});
 	};
+
+	$.getJSON('/api/v1/users', function(userModels) {
+	var t = $.map(userModels.user_list, function(item) {
+		return new User(item);
+	});
+	self.user_list(t);
+});
 }
 
 ko.applyBindings(new UserListViewModel());
+
