@@ -91,6 +91,16 @@ def get_tweet(id):
 def add_user():
     return render_template('adduser.html')
 
+@app.route('/addtweet')
+def addtweetsjs():
+    return render_template("addtweetsjs.html")
+
+
+
+
+
+
+
 
 
 
