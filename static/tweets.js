@@ -1,8 +1,8 @@
 function Tweet(data){
 	this.id = ko.observable(data.id)
-	this.username = ko.observable(data.username)
-	this.body = ko.observable(data.body)
-	this.timestamp = ko.observable(data.timestamp)
+	this.username = ko.observable(data.Username)
+	this.body = ko.observable(data.Body)
+	this.timestamp = ko.observable(data.Timestamp)
 }
 
 
@@ -20,7 +20,10 @@ function TweetListViewModel(){
 
 	$.getJSON('/api/v2/tweets',function(tweetModels){
 		var t = $.map(tweetModels.tweets_list,function (item){
-			return new Tweet(item);
+			console.log(item);
+			var twet = new Tweet(item);
+			console.log(twet.body());
+			return twet
 		});
 		self.tweets_list(t);
 	});
