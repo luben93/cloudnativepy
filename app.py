@@ -5,6 +5,8 @@ from datetime import datetime
 import json
 import sqlite3
 from pymongo import MongoClient
+import random
+
 
 app = Flask(__name__)
 app.secret_key = 'this-is-not-a-secret'
@@ -49,7 +51,8 @@ def create_user():
     user = {'username':request.json['username'],
             'email':request.json['email'],
             'name':request.json.get('name',""),
-            'password':request.json['password']
+            'password':request.json['password'],
+            'id':random.randint(1,1000)
             }
     return jsonify({'status':add_user(user)}), 201
 
@@ -214,81 +217,66 @@ def list_tweets():
 
 
 def upd_user(user):
-    conn = sqlite3.connect('mydb.db')
-    cursor = conn.cursor()
-    cursor.execute('SELECT * from users where id=?',(user['id'],))
-    data = cursor.fetchall()
-    if len(data) == 0:
-        abort(404)
+    api_list = []
+    db_user = connection.cloud_native.users
+    users = db_user.find_one({"id":user['id']})
+    for i in users:
+        api_list.append(str(i))
+    if api_list == []:
+        abort(409)
     else:
-        key_list = user.keys()
-        for i in key_list:
-            if i != 'id':
-                cursor.execute(""" UPDATE users set {0}=? where id=?""".format(i),(user[i],user['id']))
-        return "success"
+        db_user.update({'id':user['id']},{'$set':user},upsert=False)
+        return "Success"
+
 
 def del_user(del_user):
-    conn = sqlite3.connect('mydb.db')
-    cursor = conn.cursor()
-    cursor.execute('SELECT * FROM users where username=?',(del_user,))
-    data = cursor.fetchall()
-    if len(data) != 1:
+    db = connection.cloud_native.users
+    api_list = []
+    for i in db.find({"username":del_user}):
+        api_list.append(str(i))
+    if api_list == []:
         abort(404)
     else:
-        cursor.execute('delete from users where username==?',(del_user,))
-        conn.commit()
-    return 'success'
+        db.remove({'username':del_user})
+        return 'success'
 
 
 def list_user(user_id):
-    conn = sqlite3.connect('mydb.db')
-    #api_list=[]
-    #cursor = conn.connect()
-    print("userid:{user_id}")
-    cursor = conn.execute("SELECT * from users where id=?",(user_id,))
-    data = cursor.fetchall()
- #   print("data is: "+data)
-    if(len(data)!=0):
-        user = {
-            'username':data[0][0],
-            'name':data[0][1],
-            'email':data[0][2],
-            'password':data[0][3],
-            'id':data[0][4]
-        }
-    conn.close()
-    return jsonify(user)
+    api_list=[]
+    db = connection.cloud_native.users
+    print(user_id)
+    result = db.find({'id':user_id})
+    print(result)
+    for i in result:
+        api_list.append(str(i))
+
+    if api_list == []:
+        abort(404)
+    return jsonify({"user_details":api_list})
 
 
 def list_users():
-    conn = sqlite3.connect('mydb.db')
     api_list=[]
-    cursor = conn.execute("SELECT username, full_name,emailid,password,id from users")
-    for row in cursor:
-        adict = {}
-        adict["username"] = row[0]
-        adict["name"] = row[1]
-        adict["email"] = row[2]
-        adict["password"] = row[3]
-        adict["id"] = row[4]
-        api_list.append(adict)
-    conn.close()
+    db = connection.cloud_native.users
+    for row in db.find():
+        api_list.append(str(row))
     return jsonify({'user_list': api_list})
 
 def add_user(new_user):
-    conn = sqlite3.connect('mydb.db')
-    status = "Failed"
-    cursor = conn.cursor()
-    cursor.execute("SELECT * from users where username=? or emailid=?",(new_user['username'],new_user['email']))
-    if len(cursor.fetchall()) != 0:
-        print("409 already exists")
-        abort(409)
-    else:
-        cursor.execute("insert into users (username,emailid,password,full_name) values (?,?,?,?)",(new_user['username'],new_user['email'],new_user['password'],new_user['name']))
-        conn.commit()
-        status = "Success"
-    conn.close()
-    return status
+     api_list=[] 
+     print (new_user) 
+     db = connection.cloud_native.users 
+     user = db.find({'$or':[{"username":new_user['username']}     ,  
+    {"email":new_user['email']}]}) 
+     for i in user: 
+       print (str(i)) 
+       api_list.append(str(i)) 
+ 
+     if api_list == []: 
+       db.insert(new_user) 
+       return "Success" 
+     else : 
+       abort(409) 
 
 
 
