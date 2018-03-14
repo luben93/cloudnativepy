@@ -1,16 +1,14 @@
 from flask import Flask
-from flask import jsonify
-from flask import make_response
-from flask import request
-from flask import abort
-from flask import render_template
-
+from flask import jsonify, make_response, request,abort, render_template, session, redirect, url_for 
+from flask_cors import CORS, cross_origin
 from datetime import datetime
-
 import json
 import sqlite3
 
 app = Flask(__name__)
+app.secret_key = 'this-is-not-a-secret'
+CORS(app)
+
 
 @app.route("/api/v1/info")
 def home_index():
@@ -94,6 +92,25 @@ def add_user():
 @app.route('/addtweet')
 def addtweetsjs():
     return render_template("addtweetsjs.html")
+
+@app.route('/')
+def main():
+    return render_template("main.html")
+
+@app.route('/addname')
+def addname():
+    if request.args.get('yourname'):
+        session['name'] = request.args.get('yourname')
+        return redirect(url_for('main'))
+    else:
+        return render_template('addname.html',session=session)
+
+@app.route('/clear')
+def clearsession():
+    session.clear()
+    return redirect(url_for('main'))
+
+
 
 
 
