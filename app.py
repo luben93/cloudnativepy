@@ -1,5 +1,5 @@
 from flask import Flask
-from flask import jsonify, make_response, request,abort, render_template, session, redirect, url_for 
+from flask import jsonify, make_response, request,abort, render_template, session, redirect, url_for
 from flask_cors import CORS, cross_origin
 from datetime import datetime
 import json
@@ -90,7 +90,7 @@ def add_tweets():
     user_tweet['created_at'] = datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
     return jsonify({'status':add_tweet(user_tweet)}), 200
 
-@app.route('/api/v2/tweets/<int:id>',methods=['GET'])
+@app.route('/api/v2/tweets/<string:id>',methods=['GET'])
 def get_tweet(id):
     return list_tweet(id)
 
@@ -145,76 +145,59 @@ def create_mongodatabase():
 
             db_tweets.insert({"body":"my first tweet from a json db",
                 "id":"15",
-                "timestamp": "2017-03-11T06:39:40Z", 
+                "timestamp": "2017-03-11T06:39:40Z",
                 "tweetedby":"ericsan"
                 })
 
             db_api.insert({
-                "buildtime": "2017-01-01 10:00:00", 
-             "links": "/api/v1/users", 
-             "methods": "get, post, put, delete", 
-             "version": "v1" 
-                }) 
-            db_api.insert( { 
-             "buildtime": "2017-02-11 10:00:00", 
-             "links": "api/v2/tweets", 
-             "methods": "get, post", 
-             "version": "2017-01-10 10:00:00" 
+                "buildtime": "2017-01-01 10:00:00",
+             "links": "/api/v1/users",
+             "methods": "get, post, put, delete",
+             "version": "v1"
                 })
-            print ("Database Initialize completed!") 
-        else: 
+            db_api.insert( {
+             "buildtime": "2017-02-11 10:00:00",
+             "links": "api/v2/tweets",
+             "methods": "get, post",
+             "version": "2017-01-10 10:00:00"
+                })
+            print ("Database Initialize completed!")
+        else:
             print ("Database already Initialized!")
-    except: 
-        print ("Database creation failed!!") 
+    except:
+        print ("Database creation failed!!")
 
 
-def list_tweet(id):
-    conn = sqlite3.connect('mydb.db')
+def list_tweet(user_id):
     api_list = []
-    cursor = conn.execute("SELECT * from tweets where id=?",(id,))
-    data = cursor.fetchall()
-    if(len(data)==0):
+    db = connection.cloud_native.tweet
+    tweet = db.find({"username":user_id})
+    for i in tweet:
+        api_list.append(str(i))
+    if len(api_list) == 0:
         abort(404)
-    else:
-        user = {}
-        user['id'] = data[0][0]
-        user['username'] = data[0][1]
-        user['body'] = data[0][2]
-        user['tweet_time'] = data[0][3]
-    conn.close()
-    return jsonify(user)
+    return jsonify({"tweet":api_list})
 
 
 def add_tweet(new_tweet):
-    conn = sqlite3.connect("mydb.db")
-    cursor = conn.cursor()
-    cursor.execute("SELECT * from users where username=? ", (new_tweet['username'],))
-    data = cursor.fetchall()
-    if len(data) == 0:
+    users = connection.cloud_native.users
+    tweets = connection.cloud_native.tweet
+    api_list = []
+    user = users.find({"username":new_tweet['username']})
+    for i in user:
+        api_list.append(str(i))
+    if len(api_list)==0:
         abort(404)
     else:
-        cursor.execute("INSERT into tweets (username,body,tweet_time) values(?,?,?)",(new_tweet['username'],new_tweet['body'],new_tweet['created_at']))
-        conn.commit()
-    return "success"
+        tweets.insert(new_tweet)
+        return "success"
 
 def list_tweets():
-    conn = sqlite3.connect('mydb.db')
     api_list = []
-    cursor = conn.execute("SELECT username, body, tweet_time, id from tweets")
-    data = cursor.fetchall()
-    if len(data) != 0:
-        for row in data:
-            tweets = {}
-            tweets['Tweet by'] = row[0]
-            tweets['Body'] = row[1]
-            tweets['Timestamp'] = row[2]
-            tweets['id'] = row[3]
-            api_list.append(tweets)
-    else:
-        return api_list
-    conn.close()
-    return jsonify({'tweets_list':api_list})
-
+    db = connection.cloud_native.tweet
+    for row in db.find():
+        api_list.append(str(row))
+    return jsonify({"tweets_list":api_list})
 
 def upd_user(user):
     api_list = []
@@ -263,20 +246,20 @@ def list_users():
     return jsonify({'user_list': api_list})
 
 def add_user(new_user):
-     api_list=[] 
-     print (new_user) 
-     db = connection.cloud_native.users 
-     user = db.find({'$or':[{"username":new_user['username']}     ,  
-    {"email":new_user['email']}]}) 
-     for i in user: 
-       print (str(i)) 
-       api_list.append(str(i)) 
- 
-     if api_list == []: 
-       db.insert(new_user) 
-       return "Success" 
-     else : 
-       abort(409) 
+     api_list=[]
+     print (new_user)
+     db = connection.cloud_native.users
+     user = db.find({'$or':[{"username":new_user['username']}     ,
+    {"email":new_user['email']}]})
+     for i in user:
+       print (str(i))
+       api_list.append(str(i))
+
+     if api_list == []:
+       db.insert(new_user)
+       return "Success"
+     else :
+       abort(409)
 
 
 
