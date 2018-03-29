@@ -16,22 +16,11 @@ connection = MongoClient("mongodb://localhost:27017/")
 
 @app.route("/api/v1/info")
 def home_index():
-    #conn = sqlite3.connect('mydb.db')
     api_list = []
     db = connection.cloud_native.apirelease
     print ("opened db")
     for row in db.find():
         api_list.append(str(row))
-
-    # cursor = conn.execute("SELECT buildtime,version,methods,links from apirelease")
-    # for row in cursor:
-    #     a_dict = {}
-    #     a_dict['version'] = row[0]
-    #     a_dict['buildtime'] = row[1]
-    #     a_dict['methods'] = row[2]
-    #     a_dict['links'] = row[3]
-    #     api_list.append(a_dict)
-    # conn.close()
     return jsonify({'api_version': api_list}),200
 
 
@@ -128,6 +117,8 @@ def clearsession():
 
 
 
+
+
 def create_mongodatabase():
     try:
         dbnames = connection.database_names()
@@ -198,21 +189,10 @@ def add_tweet(new_tweet):
     return "success"
 
 def list_tweets():
-    conn = sqlite3.connect('mydb.db')
     api_list = []
-    cursor = conn.execute("SELECT username, body, tweet_time, id from tweets")
-    data = cursor.fetchall()
-    if len(data) != 0:
-        for row in data:
-            tweets = {}
-            tweets['Tweet by'] = row[0]
-            tweets['Body'] = row[1]
-            tweets['Timestamp'] = row[2]
-            tweets['id'] = row[3]
-            api_list.append(tweets)
-    else:
-        return api_list
-    conn.close()
+    db = connection.cloud_native.tweets_list
+    for row in db.find():
+        api_list.append(str(row))
     return jsonify({'tweets_list':api_list})
 
 
