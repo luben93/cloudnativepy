@@ -16,22 +16,11 @@ connection = MongoClient("mongodb://localhost:27017/")
 
 @app.route("/api/v1/info")
 def home_index():
-    #conn = sqlite3.connect('mydb.db')
     api_list = []
     db = connection.cloud_native.apirelease
     print ("opened db")
     for row in db.find():
         api_list.append(str(row))
-
-    # cursor = conn.execute("SELECT buildtime,version,methods,links from apirelease")
-    # for row in cursor:
-    #     a_dict = {}
-    #     a_dict['version'] = row[0]
-    #     a_dict['buildtime'] = row[1]
-    #     a_dict['methods'] = row[2]
-    #     a_dict['links'] = row[3]
-    #     api_list.append(a_dict)
-    # conn.close()
     return jsonify({'api_version': api_list}),200
 
 
@@ -128,6 +117,8 @@ def clearsession():
 
 
 
+
+
 def create_mongodatabase():
     try:
         dbnames = connection.database_names()
@@ -194,10 +185,11 @@ def add_tweet(new_tweet):
 
 def list_tweets():
     api_list = []
-    db = connection.cloud_native.tweet
+    db = connection.cloud_native.tweets_list
     for row in db.find():
         api_list.append(str(row))
-    return jsonify({"tweets_list":api_list})
+    return jsonify({'tweets_list':api_list})
+
 
 def upd_user(user):
     api_list = []

@@ -26,7 +26,7 @@ class FlaskappTests(unittest.TestCase):
         self.assertEqual(result.status_code,201)
 
     def test_update_user_status_code(self):
-        result = self.app.put('/api/v1/users/2',data='{"password":"not a secret anymore"}',content_type='application/json')
+        result = self.app.put('/api/v1/users/33',data='{"password":"not a secret anymore"}',content_type='application/json')
         self.assertEqual(result.status_code,200)
 
     def test_add_tweets_status_code(self):
