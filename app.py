@@ -95,6 +95,10 @@ def addtweetsjs():
 def main():
     return render_template("main.html")
 
+@app.route('/index')
+def index():
+    return render_template('index.html')
+
 @app.route('/addname')
 def addname():
     if request.args.get('yourname'):
@@ -185,7 +189,7 @@ def add_tweet(new_tweet):
 
 def list_tweets():
     api_list = []
-    db = connection.cloud_native.tweets_list
+    db = connection.cloud_native.tweet
     for row in db.find():
         api_list.append(str(row))
     return jsonify({'tweets_list':api_list})
