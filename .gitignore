@@ -2,3 +2,5 @@ env/
 *.db
 *.pyc
 __pycache__/
+static/build/
+node_modules/

@@ -1,6 +1,6 @@
 export default class Tweettemplate extends React.Component {
     render(props){
-        console.log(this.props)
+ //       console.log(this.props)
         return(
         <li className="collection-item avatar">
             <i className="material-icons circle red">play_arrow</i>

@@ -178,11 +178,12 @@ def add_tweet(new_tweet):
     users = connection.cloud_native.users
     tweets = connection.cloud_native.tweet
     api_list = []
+    print(new_tweet)
     user = users.find({"username":new_tweet['username']})
     for i in user:
         api_list.append(str(i))
     if len(api_list)==0:
-        abort(404)
+        abort(504)
     else:
         tweets.insert(new_tweet)
         return "success"
@@ -275,6 +276,10 @@ def invalid_request(error):
 @app.errorhandler(404)
 def resource_not_found(error):
     return make_response(jsonify({'error':'Resource not found!'}),404)
+
+@app.errorhandler(504)
+def resource_not_found(error):
+    return make_response(jsonify({'error':'api Resource not found!'}),404)
 
 
 if __name__ == "__main__":

@@ -22,10 +22,33 @@ class Main extends React.Component{
 
     }
 
+
+
     addTweet(tweet){
-        let newTweet = this.state.tweets;
-        newTweet.unshift({'id':Date.now(),'name':'guest','body':tweet});
-        this.setState(newTweet);
+        var self = this;
+        $.ajax({
+            url: '/api/v2/tweets',
+            contentType: 'application/json',
+            type: 'POST',
+            data: JSON.stringify({
+                'username': "Agnsur",
+                'body': tweet,
+
+            }),
+            success: function(data) {
+            let newTweetList = self.state.tweets;
+            newTweetList.unshift({ tweetedby: "Saussiona55",body: tweet, timestamp: Date.now });
+            self.setState({tweets: newTweetList})
+                return console.log("success");
+
+            },
+            error: function(data) {
+                console.log(data)
+                return console.log("Failed");
+
+            }
+
+        });
 
     }
 
@@ -39,7 +62,7 @@ class Main extends React.Component{
                // console.log(t1);
                 self.setState({tweets: t});
             //   alert(self.state.tweets);
-                return console.log("success");
+               // return console.log("success");
 
             },
             error: function() {
