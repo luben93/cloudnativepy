@@ -191,7 +191,9 @@ def list_tweets():
     api_list = []
     db = connection.cloud_native.tweet
     for row in db.find():
-        api_list.append(str(row))
+        row.pop('_id')
+        print(jsonify(row))
+        api_list.append((row))
     return jsonify({'tweets_list':api_list})
 
 
