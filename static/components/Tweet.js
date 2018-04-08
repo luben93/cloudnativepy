@@ -6,9 +6,21 @@ export default class Tweet extends React.Component {
         this.refs.tweetTextArea.value = '';
     }
 
+
+
     render(){
         return(
-            <div className="row">
+      <div className="row">
+                    <nav>
+                      <div className="nav-wrapper">
+                        <a href="#" className="brand-logo">APP</a>
+                        <ul id="nav-mobile" className="right hide-on-med-and-down">
+                          <li><a href="/profile">Profile</a></li>
+                          <li><a href="/logout">Logout</a></li>
+                        </ul>
+                      </div>
+            </nav>
+
             <form onSubmit={this.sendTweet.bind(this) }>
             <div className="input-field">
             <textarea ref="tweetTextArea" className="materialize-textarea" />
